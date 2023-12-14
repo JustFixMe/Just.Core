@@ -1,10 +1,14 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
+using Just.Core.Extensions;
 
 namespace Just.Core.Collections;
 
 public class DataMap<T> : Map<T>, IDataMap<T>, ICloneable
     where T : IComparisonOperators<T, T, bool>, IEqualityOperators<T, T, bool>
 {
+    public static int ElementSize { get; } = Marshal.SizeOf<T>();
+
     internal MapPoint<T> MinCache = default;
     internal MapPoint<T> MaxCache = default;
 
@@ -84,4 +88,85 @@ public class DataMap<T> : Map<T>, IDataMap<T>, ICloneable
     }
 
     object ICloneable.Clone() => Clone();
+}
+
+public static class DataMap
+{
+    public const int HeaderSize = sizeof(Int64) + 2 * sizeof(UInt32);
+    public struct Header
+    {
+        public Int64 BodySize;
+        public UInt32 Width;
+        public UInt32 Height;
+    }
+
+    public static async ValueTask WriteToStreamAsync<T>(this DataMap<T> map, Stream stream, CancellationToken cancellationToken = default)
+        where T : unmanaged, IComparisonOperators<T, T, bool>, IEqualityOperators<T, T, bool>
+    {
+        var head = new Header
+        {
+            BodySize = DataMap<T>.ElementSize * map.Width * map.Height,
+            Width = (uint)map.Width,
+            Height = (uint)map.Height
+        };
+
+        var headBytes = MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref head, 1))
+            .ToArray();
+        var bodyBytes = MemoryMarshal.AsBytes(map.AsSpan())
+            .ToArray();
+
+        await stream.WriteAsync(headBytes, cancellationToken);
+        await stream.WriteAsync(bodyBytes, cancellationToken);
+    }
+    public static async ValueTask<DataMap<T>> ReadFromStreamAsync<T>(Stream stream, CancellationToken cancellationToken = default)
+        where T : unmanaged, IComparisonOperators<T, T, bool>, IEqualityOperators<T, T, bool>
+    {
+        byte[] headBytes = new byte[HeaderSize];
+        await stream.PopulateAsync(headBytes, cancellationToken);
+        var head = MemoryMarshal.Read<Header>(headBytes);
+
+        var bodySize = DataMap<T>.ElementSize * head.Width * head.Height;
+        if (bodySize != head.BodySize) throw new InvalidOperationException("Can not read DataMap. Element size mismatch.");
+
+        byte[] bodyBytes = new byte[bodySize];
+        await stream.PopulateAsync(bodyBytes, cancellationToken);
+
+        T[] body = MemoryMarshal.Cast<byte, T>(bodyBytes).ToArray();
+        return new DataMap<T>((int)head.Width, (int)head.Height, body);
+    }
+
+
+    public static void WriteToStream<T>(this DataMap<T> map, Stream stream)
+        where T : unmanaged, IComparisonOperators<T, T, bool>, IEqualityOperators<T, T, bool>
+    {
+        var head = new Header
+        {
+            BodySize = DataMap<T>.ElementSize * map.Width * map.Height,
+            Width = (uint)map.Width,
+            Height = (uint)map.Height
+        };
+
+        var headBytes = MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref head, 1));
+        var bodyBytes = MemoryMarshal.AsBytes(map.AsSpan());
+
+        stream.Write(headBytes);
+        stream.Write(bodyBytes);
+    }
+    public static DataMap<T> ReadFromStream<T>(Stream stream)
+        where T : unmanaged, IComparisonOperators<T, T, bool>, IEqualityOperators<T, T, bool>
+    {
+        Header head = default;
+        var headSpan = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref head, 1));
+        stream.Populate(headSpan);
+
+        var bodySize = DataMap<T>.ElementSize * head.Width * head.Height;
+        if (bodySize != head.BodySize) throw new InvalidOperationException("Can not read DataMap. Element size mismatch.");
+
+        T[] body = new T[bodySize];
+        var bodySpan = MemoryMarshal.AsBytes(body.AsSpan());
+
+        stream.Populate(bodySpan);
+        
+        return new DataMap<T>((int)head.Width, (int)head.Height, body);
+    }
 }
