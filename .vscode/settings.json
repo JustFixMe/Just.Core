@@ -1,0 +1,4 @@
+{
+    "dotnet.defaultSolution": "JustDotNet.Core.sln",
+    "dotnetAcquisitionExtension.enableTelemetry": false
+}
