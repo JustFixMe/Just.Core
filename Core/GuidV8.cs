@@ -13,27 +13,27 @@ public static class GuidV8
     [Pure]
     public static Guid NewGuid(DateTime dateTime, GuidV8Entropy entropy = GuidV8Entropy.Strong)
     {
-        var timestamp = dateTime.ToBinary() & 0x3FFF_FFFF_FFFF_FFFF;
+        var epoch = dateTime.Subtract(DateTime.UnixEpoch);
+        var timestamp = epoch.Ticks / (TimeSpan.TicksPerMillisecond / 10);
 
         Span<byte> ts = stackalloc byte[8];
         MemoryMarshal.Write(ts, timestamp);
 
         Span<byte> bytes = stackalloc byte[16];
 
-        ts[4..].CopyTo(bytes[..4]);
-        ts[2..4].CopyTo(bytes[4..6]);
-        ts[..2].CopyTo(bytes[6..8]);
-
-        bytes[7] = (byte)((bytes[7] & 0x0f) | 0x80);
+        ts[0..2].CopyTo(bytes[4..6]);
+        ts[2..6].CopyTo(bytes[..4]);
 
         if (entropy == GuidV8Entropy.Strong)
         {
-            RandomNumberGenerator.Fill(bytes[8..]);
+            RandomNumberGenerator.Fill(bytes[6..]);
         }
         else
         {
-            Random.Shared.NextBytes(bytes[8..]);
+            Random.Shared.NextBytes(bytes[6..]);
         }
+
+        bytes[7] = (byte)((bytes[7] & 0x0F) | 0x80);
 
         return new Guid(bytes);
     }
