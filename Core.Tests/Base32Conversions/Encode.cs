@@ -28,7 +28,7 @@ public class Encode
         var resultBytes = Base32.Decode(testString);
         var resultString = Base32.Encode(resultBytes);
 
-        resultString.Should().BeEquivalentTo(testString);
+        resultString.Should().Be(testString);
     }
 
     [Theory]
@@ -51,6 +51,6 @@ public class Encode
     public void WhenCalledWithEmptyByteArray_ShouldReturnEmptyString(byte[] testArray)
     {
         var actualBase32 = Base32.Encode(testArray);
-        actualBase32?.Should().Be(string.Empty);
+        actualBase32.Should().Be(string.Empty);
     }
 }
