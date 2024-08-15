@@ -43,8 +43,8 @@ public class Encode
     {
         var str = Base32.Encode(testArray);
         str.Should().Be(expected);
-    } 
-    
+    }
+
     [Theory]
     [InlineData(new byte[] { })]
     [InlineData(null)]
@@ -52,5 +52,18 @@ public class Encode
     {
         var actualBase32 = Base32.Encode(testArray);
         actualBase32.Should().Be(string.Empty);
+    }
+
+    [Theory]
+    [InlineData(new byte[] { })]
+    [InlineData(null)]
+    public void WhenCalledWithEmptyByteArray_ShouldReturnZeroAndNotChangeOutput(byte[] testArray)
+    {
+        char[] output = ['1', '2', '3', '4'];
+
+        var charsWritten = Base32.Encode(testArray, output);
+
+        charsWritten.Should().Be(0);
+        output.Should().Equal(['1', '2', '3', '4']);
     }
 }

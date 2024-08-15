@@ -56,7 +56,7 @@ public class Decode
         var actualBytesArray = Base32.Decode(testString);
         actualBytesArray.Should().Equal(expected);
     }
-    
+
     [Theory]
     [InlineData("  ")]
     [InlineData("hg2515i3215")]

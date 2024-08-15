@@ -29,4 +29,26 @@ public class Encode
         var result = Base64Url.Encode(testBytes);
         result.Should().Be(expected);
     }
+
+    [Theory]
+    [InlineData(new byte[] { })]
+    [InlineData(null)]
+    public void WhenCalledWithEmptyByteArray_ShouldReturnEmptyString(byte[] testArray)
+    {
+        var actualBase32 = Base64Url.Encode(testArray);
+        actualBase32.Should().Be(string.Empty);
+    }
+
+    [Theory]
+    [InlineData(new byte[] { })]
+    [InlineData(null)]
+    public void WhenCalledWithEmptyByteArray_ShouldReturnZeroAndNotChangeOutput(byte[] testArray)
+    {
+        char[] output = ['1', '2', '3', '4'];
+
+        var charsWritten = Base64Url.Encode(testArray, output);
+
+        charsWritten.Should().Be(0);
+        output.Should().Equal(['1', '2', '3', '4']);
+    }
 }

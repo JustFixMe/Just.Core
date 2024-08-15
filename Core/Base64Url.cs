@@ -95,6 +95,8 @@ public static class Base64Url
 
     [Pure] public static int Encode(ReadOnlySpan<byte> input, Span<char> output)
     {
+        if (input.IsEmpty) return 0;
+
         var charlen = 8 * ((input.Length + 5) / 6);
         Span<char> chars = stackalloc char[charlen];
         Convert.TryToBase64Chars(input, chars, out int charsWritten);

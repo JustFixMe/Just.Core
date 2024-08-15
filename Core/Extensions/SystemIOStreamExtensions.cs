@@ -8,7 +8,7 @@ public static class SystemIOStreamExtensions
         => stream.Populate(buffer.AsSpan());
     public static void Populate(this Stream stream, Span<byte> buffer)
     {
-        do
+        while (buffer.Length > 0)
         {
             var readed = stream.Read(buffer);
 
@@ -19,7 +19,6 @@ public static class SystemIOStreamExtensions
 
             buffer = buffer[readed..];
         }
-        while (buffer.Length > 0);
     }
 
     public static async ValueTask PopulateAsync(this Stream stream, byte[] buffer, CancellationToken cancellationToken = default)
@@ -28,7 +27,7 @@ public static class SystemIOStreamExtensions
         => await stream.PopulateAsync(buffer.AsMemory(offset, length), cancellationToken);
     public static async ValueTask PopulateAsync(this Stream stream, Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
-        do
+        while (buffer.Length > 0)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -41,6 +40,5 @@ public static class SystemIOStreamExtensions
 
             buffer = buffer[readed..];
         }
-        while (buffer.Length > 0);
     }
 }

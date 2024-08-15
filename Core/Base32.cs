@@ -24,6 +24,8 @@ public static class Base32
     [Pure]
     public static int Encode(ReadOnlySpan<byte> input, Span<char> output)
     {
+        if (input.IsEmpty) return 0;
+
         int i = 0;
         ReadOnlySpan<char> alphabet = Alphabet;
         for (int offset = 0; offset < input.Length;)

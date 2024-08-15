@@ -50,4 +50,36 @@ public class Decode
         var result = Base64Url.Decode(testString);
         result.Should().BeEquivalentTo(expected);
     }
+
+    [Theory]
+    [InlineData("  ")]
+    [InlineData("hg2&515i3215")]
+    [InlineData("hg712)21")]
+    [InlineData("hg712f 21")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1806:Do not ignore method results", Justification = "Test case")]
+    public void WhenCalledWithInvalidString_ShouldThrowFormatException(string testString)
+    {
+        Action action = () => Base64Url.Decode(testString);
+        action.Should().Throw<FormatException>();
+    }
+
+    [Theory]
+    [InlineData("5QrdUxDUV CAEGw8pvLsEw")]
+    [InlineData("6nE2uKQ4$0ar9kpmybgkdw")]
+    [InlineData("PyD6zwDqXkG*S1HPsp41wQ")]
+    [InlineData("!dOlPOh3wEe9PlyQgTMt2g")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1806:Do not ignore method results", Justification = "Test case")]
+    public void WhenCalledWithInvalidGuidString_ShouldThrowFormatException(string testString)
+    {
+        Action action = () => Base64Url.DecodeGuid(testString);
+        action.Should().Throw<FormatException>();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void WhenCalledWithNullString_ShouldReturnEmptyArray(string testString)
+    {
+        Base64Url.Decode(testString).Should().BeEmpty();
+    }
 }
