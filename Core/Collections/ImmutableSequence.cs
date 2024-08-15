@@ -1,14 +1,12 @@
 using System.Collections;
 using System.Collections.Immutable;
-using System.Numerics;
 
 namespace Just.Core.Collections;
 
 public class ImmutableSequence<T> :
     IEnumerable<T>,
     IReadOnlyList<T>,
-    IEquatable<ImmutableSequence<T>>,
-    IEqualityOperators<ImmutableSequence<T>, ImmutableSequence<T>, bool>
+    IEquatable<ImmutableSequence<T>>
 {
     private static readonly int InitialHash = typeof(ImmutableSequence<T>).GetHashCode();
     private static readonly Func<T?, T?, bool> CompareItem = EqualityComparer<T>.Default.Equals;
