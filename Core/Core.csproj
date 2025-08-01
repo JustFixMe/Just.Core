@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Just.Core</AssemblyName>
@@ -10,7 +10,7 @@
     <Description>Small .Net library with useful helper classes, functions and extensions.</Description>
     <PackageTags>extensions;helpers;helper-functions</PackageTags>
     <Authors>JustFixMe</Authors>
-    <Copyright>Copyright (c) 2023,2024 JustFixMe</Copyright>
+    <Copyright>Copyright (c) 2023-2025 JustFixMe</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/JustFixMe/Just.Core/</RepositoryUrl>

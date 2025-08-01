@@ -36,7 +36,7 @@ public class Decode
         var actualBytesArray = Base32.Decode(str);
         actualBytesArray.Should().Equal(expected);
     }
-    
+
     [Theory]
     [InlineData("ZFXJMF5N====", new byte[] { 0b11001001, 0b01101110, 0b10010110, 0b00010111, 0b10101101, })]
     [InlineData("CPIKTMY=====", new byte[] { 0b00010011, 0b11010000, 0b10101001, 0b10110011, })]
@@ -72,7 +72,7 @@ public class Decode
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void WhenCalledWithNullString_ShouldReturnEmptyArray(string testString)
+    public void WhenCalledWithNullString_ShouldReturnEmptyArray(string? testString)
     {
         Base32.Decode(testString).Should().BeEmpty();
     }

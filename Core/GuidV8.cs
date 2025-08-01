@@ -3,15 +3,13 @@ using System.Security.Cryptography;
 
 namespace Just.Core;
 
-public enum GuidV8Entropy { Strong, Weak }
-
 public static class GuidV8
 {
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Guid NewGuid(GuidV8Entropy entropy = GuidV8Entropy.Strong) => NewGuid(DateTime.UtcNow, entropy);
+    public static Guid NewGuid(RngEntropy entropy = RngEntropy.Strong) => NewGuid(DateTime.UtcNow, entropy);
 
     [Pure]
-    public static Guid NewGuid(DateTime dateTime, GuidV8Entropy entropy = GuidV8Entropy.Strong)
+    public static Guid NewGuid(DateTime dateTime, RngEntropy entropy = RngEntropy.Strong)
     {
         var epoch = dateTime.Subtract(DateTime.UnixEpoch);
         var timestamp = epoch.Ticks / (TimeSpan.TicksPerMillisecond / 10);
@@ -24,7 +22,7 @@ public static class GuidV8
         ts[0..2].CopyTo(bytes[4..6]);
         ts[2..6].CopyTo(bytes[..4]);
 
-        if (entropy == GuidV8Entropy.Strong)
+        if (entropy == RngEntropy.Strong)
         {
             RandomNumberGenerator.Fill(bytes[6..]);
         }

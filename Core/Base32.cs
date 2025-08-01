@@ -4,23 +4,23 @@ public static class Base32
 {
     public const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
     public const char Padding = '=';
+    public const int MaxBytesStack = 250;
 
     [Pure]
     public static string Encode(ReadOnlySpan<byte> input)
     {
-        if (input.Length == 0)
-        {
-            return string.Empty;
-        }
+        if (input.IsEmpty) return string.Empty;
 
         int outLength = 8 * ((input.Length + 4) / 5);
-        Span<char> output = stackalloc char[outLength];
+        Span<char> output = input.Length <= MaxBytesStack
+            ? stackalloc char[outLength]
+            : new char[outLength];
 
         _ = Encode(input, output);
 
         return new string(output);
     }
-    
+
     [Pure]
     public static int Encode(ReadOnlySpan<byte> input, Span<char> output)
     {
@@ -47,10 +47,14 @@ public static class Base32
     [Pure]
     public static byte[] Decode(ReadOnlySpan<char> input)
     {
+        input = input.TrimEnd(Padding);
         if (input.IsEmpty) return [];
-        
-        Span<byte> output = stackalloc byte[5 * input.Length / 8];
-        
+
+        var outputLength = 5 * ((input.Length + 7) / 8);
+        Span<byte> output = outputLength <= MaxBytesStack
+            ? stackalloc byte[outputLength]
+            : new byte[outputLength];
+
         var size = Decode(input, output);
 
         return output[..size].ToArray();
@@ -60,7 +64,14 @@ public static class Base32
     public static int Decode(ReadOnlySpan<char> input, Span<byte> output)
     {
         input = input.TrimEnd(Padding);
-        Span<char> inputspan = stackalloc char[input.Length];
+
+        var outputLength = 5 * ((input.Length + 7) / 8);
+        output = output[..outputLength];
+        output.Clear();
+
+        Span<char> inputspan = outputLength <= MaxBytesStack
+            ? stackalloc char[input.Length]
+            : new char[input.Length];
         input.ToUpperInvariant(inputspan);
 
         int bitIndex = 0;
@@ -79,7 +90,7 @@ public static class Base32
             {
                 throw new FormatException("Provided string contains invalid characters.");
             }
-            
+
             bitPos = 5 - bitIndex;
             outBitPos = 8 - outputBits;
             bits = bitPos < outBitPos ? bitPos : outBitPos;
@@ -106,7 +117,6 @@ public static class Base32
         return outputIndex + (outputBits + 7) / 8;
     }
 
-    
     // returns the number of bytes that were output
     [Pure]
     private static int GetNextGroup(ReadOnlySpan<byte> input, ref int offset, out byte a, out byte b, out byte c, out byte d, out byte e, out byte f, out byte g, out byte h)
