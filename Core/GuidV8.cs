@@ -1,38 +1,42 @@
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace Just.Core;
 
 public static class GuidV8
 {
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private const long TicksPrecision = TimeSpan.TicksPerMillisecond / 10;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Guid NewGuid(RngEntropy entropy = RngEntropy.Strong) => NewGuid(DateTime.UtcNow, entropy);
 
-    [Pure]
     public static Guid NewGuid(DateTime dateTime, RngEntropy entropy = RngEntropy.Strong)
     {
         var epoch = dateTime.Subtract(DateTime.UnixEpoch);
-        var timestamp = epoch.Ticks / (TimeSpan.TicksPerMillisecond / 10);
+        var timestamp = epoch.Ticks / TicksPrecision;
 
-        Span<byte> ts = stackalloc byte[8];
-        MemoryMarshal.Write(ts, timestamp);
+        uint tsHigh = (uint)((timestamp >> 16) & 0xFFFFFFFF);
+        ushort tsLow = (ushort)(timestamp & 0x0000FFFF);
 
-        Span<byte> bytes = stackalloc byte[16];
-
-        ts[0..2].CopyTo(bytes[4..6]);
-        ts[2..6].CopyTo(bytes[..4]);
+        Span<byte> bytes = stackalloc byte[10];
 
         if (entropy == RngEntropy.Strong)
         {
-            RandomNumberGenerator.Fill(bytes[6..]);
+            RandomNumberGenerator.Fill(bytes);
         }
         else
         {
-            Random.Shared.NextBytes(bytes[6..]);
+            Random.Shared.NextBytes(bytes);
         }
 
-        bytes[7] = (byte)((bytes[7] & 0x0F) | 0x80);
+        bytes[0] = (byte)((bytes[0] & 0x0F) | 0x80); // Version 8
+        bytes[2] = (byte)((bytes[2] & 0x1F) | 0x80); // Variant 0b1000
 
-        return new Guid(bytes);
+        ushort version = (ushort)((bytes[0] << 8) | bytes[1]);
+
+        return new Guid(
+            tsHigh,
+            tsLow,
+            version,
+            bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7], bytes[8], bytes[9]);
     }
 }
