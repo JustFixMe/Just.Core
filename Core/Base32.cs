@@ -16,9 +16,9 @@ public static class Base32
             ? stackalloc char[outLength]
             : new char[outLength];
 
-        _ = Encode(input, output);
+        var size = Encode(input, output);
 
-        return new string(output);
+        return new string(output[..size]);
     }
 
     [Pure]
@@ -26,20 +26,31 @@ public static class Base32
     {
         if (input.IsEmpty) return 0;
 
+        int outputLength = 8 * ((input.Length + 4) / 5);
+        if (output.Length < outputLength)
+        {
+            throw new ArgumentException("Encoded input can not fit in output span.", nameof(output));
+        }
+
+        output = output[..outputLength];
+
         int i = 0;
         ReadOnlySpan<char> alphabet = Alphabet;
+        Span<byte> alphabetKeys = stackalloc byte[8];
+
         for (int offset = 0; offset < input.Length;)
         {
-            int numCharsToOutput = GetNextGroup(input, ref offset, out byte a, out byte b, out byte c, out byte d, out byte e, out byte f, out byte g, out byte h);
+            alphabetKeys.Clear();
+            int numCharsToOutput = GetNextGroup(input, ref offset, alphabetKeys);
 
-            output[i++] = (numCharsToOutput > 0) ? alphabet[a] : Padding;
-            output[i++] = (numCharsToOutput > 1) ? alphabet[b] : Padding;
-            output[i++] = (numCharsToOutput > 2) ? alphabet[c] : Padding;
-            output[i++] = (numCharsToOutput > 3) ? alphabet[d] : Padding;
-            output[i++] = (numCharsToOutput > 4) ? alphabet[e] : Padding;
-            output[i++] = (numCharsToOutput > 5) ? alphabet[f] : Padding;
-            output[i++] = (numCharsToOutput > 6) ? alphabet[g] : Padding;
-            output[i++] = (numCharsToOutput > 7) ? alphabet[h] : Padding;
+            output[i++] = (numCharsToOutput > 0) ? alphabet[alphabetKeys[0]] : Padding;
+            output[i++] = (numCharsToOutput > 1) ? alphabet[alphabetKeys[1]] : Padding;
+            output[i++] = (numCharsToOutput > 2) ? alphabet[alphabetKeys[2]] : Padding;
+            output[i++] = (numCharsToOutput > 3) ? alphabet[alphabetKeys[3]] : Padding;
+            output[i++] = (numCharsToOutput > 4) ? alphabet[alphabetKeys[4]] : Padding;
+            output[i++] = (numCharsToOutput > 5) ? alphabet[alphabetKeys[5]] : Padding;
+            output[i++] = (numCharsToOutput > 6) ? alphabet[alphabetKeys[6]] : Padding;
+            output[i++] = (numCharsToOutput > 7) ? alphabet[alphabetKeys[7]] : Padding;
         }
         return i;
     }
@@ -66,6 +77,11 @@ public static class Base32
         input = input.TrimEnd(Padding);
 
         var outputLength = 5 * ((input.Length + 7) / 8);
+        if (output.Length < outputLength)
+        {
+            throw new ArgumentException("Decoded input can not fit in output span.", nameof(output));
+        }
+
         output = output[..outputLength];
         output.Clear();
 
@@ -119,7 +135,7 @@ public static class Base32
 
     // returns the number of bytes that were output
     [Pure]
-    private static int GetNextGroup(ReadOnlySpan<byte> input, ref int offset, out byte a, out byte b, out byte c, out byte d, out byte e, out byte f, out byte g, out byte h)
+    private static int GetNextGroup(ReadOnlySpan<byte> input, ref int offset, Span<byte> alphabetKeys)
     {
         var retVal = (input.Length - offset) switch
         {
@@ -135,14 +151,14 @@ public static class Base32
         uint b4 = (offset < input.Length) ? input[offset++] : 0U;
         uint b5 = (offset < input.Length) ? input[offset++] : 0U;
 
-        a = (byte)(b1 >> 3);
-        b = (byte)(((b1 & 0x07) << 2) | (b2 >> 6));
-        c = (byte)((b2 >> 1) & 0x1f);
-        d = (byte)(((b2 & 0x01) << 4) | (b3 >> 4));
-        e = (byte)(((b3 & 0x0f) << 1) | (b4 >> 7));
-        f = (byte)((b4 >> 2) & 0x1f);
-        g = (byte)(((b4 & 0x3) << 3) | (b5 >> 5));
-        h = (byte)(b5 & 0x1f);
+        alphabetKeys[0] = (byte)(b1 >> 3);
+        alphabetKeys[1] = (byte)(((b1 & 0x07) << 2) | (b2 >> 6));
+        alphabetKeys[2] = (byte)((b2 >> 1) & 0x1f);
+        alphabetKeys[3] = (byte)(((b2 & 0x01) << 4) | (b3 >> 4));
+        alphabetKeys[4] = (byte)(((b3 & 0x0f) << 1) | (b4 >> 7));
+        alphabetKeys[5] = (byte)((b4 >> 2) & 0x1f);
+        alphabetKeys[6] = (byte)(((b4 & 0x3) << 3) | (b5 >> 5));
+        alphabetKeys[7] = (byte)(b5 & 0x1f);
 
         return retVal;
     }

@@ -7,7 +7,7 @@ public class Decode
     [InlineData(554121)]
     [InlineData(100454567)]
     [InlineData(3210589)]
-    public void WhenEncodedToString_ShouldBeDecodedToTheSameByteArray(int seed)
+    public void WhenBytesEncodedToString_ShouldBeDecodedToTheSameByteArray(int seed)
     {
         var rng = new Random(seed);
 
@@ -21,6 +21,43 @@ public class Decode
 
             resultBytes.Should().BeEquivalentTo(testBytes);
         }
+    }
+
+    [Theory]
+    [InlineData(72121)]
+    [InlineData(554121)]
+    [InlineData(100454567)]
+    [InlineData(3210589)]
+    public void WhenLongEncodedToString_ShouldBeDecodedToTheSameLongArray(int seed)
+    {
+        var rng = new Random(seed);
+
+        for (int i = 1; i <= 512; i++)
+        {
+            var testLong = rng.NextInt64();
+
+            var resultString = Base64Url.Encode(testLong);
+            var resultLong = Base64Url.DecodeLong(resultString);
+
+            resultLong.Should().Be(testLong);
+        }
+    }
+
+    [Theory]
+    [InlineData("RgGxr0_n1ZI", -7866126844696657594L)]
+    [InlineData("sxAPfpKB5kY", 5108913293478531251L)]
+    [InlineData("lO4_uitvLCg", 2894810894091415188L)]
+    [InlineData("awxjIqZWz10", 6759716837247880299L)]
+    [InlineData("VjNe72vug4U", -8825948697371200682L)]
+    [InlineData("AAAAAAAAAAA", 0L)]
+    [InlineData("__________8", -1L)]
+    [InlineData("AQAAAAAAAAA", 1L)]
+    [InlineData("CgAAAAAAAAA", 10L)]
+    [InlineData("6AMAAAAAAAA", 1000L)]
+    public void WhenCalled_ShouldReturnValidLong(string testString, long expected)
+    {
+        var result = Base64Url.DecodeLong(testString);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -76,9 +113,22 @@ public class Decode
     }
 
     [Theory]
+    [InlineData("RgG&r0_n1ZI")]
+    [InlineData("sxA fpKB5kY")]
+    [InlineData("lO4_uitvL)g")]
+    [InlineData("awxjIqZ^z10")]
+    [InlineData("VjNe7!vug4U")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1806:Do not ignore method results", Justification = "Test case")]
+    public void WhenCalledWithInvalidLongString_ShouldThrowFormatException(string testString)
+    {
+        Action action = () => Base64Url.DecodeLong(testString);
+        action.Should().Throw<FormatException>();
+    }
+
+    [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void WhenCalledWithNullString_ShouldReturnEmptyArray(string testString)
+    public void WhenCalledWithNullString_ShouldReturnEmptyArray(string? testString)
     {
         Base64Url.Decode(testString).Should().BeEmpty();
     }

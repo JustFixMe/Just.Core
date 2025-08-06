@@ -16,6 +16,23 @@ public class Encode
     }
 
     [Theory]
+    [InlineData("RgGxr0_n1ZI", -7866126844696657594L)]
+    [InlineData("sxAPfpKB5kY", 5108913293478531251L)]
+    [InlineData("lO4_uitvLCg", 2894810894091415188L)]
+    [InlineData("awxjIqZWz10", 6759716837247880299L)]
+    [InlineData("VjNe72vug4U", -8825948697371200682L)]
+    [InlineData("AAAAAAAAAAA", 0L)]
+    [InlineData("__________8", -1L)]
+    [InlineData("AQAAAAAAAAA", 1L)]
+    [InlineData("CgAAAAAAAAA", 10L)]
+    [InlineData("6AMAAAAAAAA", 1000L)]
+    public void WhenCalledWithLong_ShouldReturnValidString(string expected, long testLong)
+    {
+        var result = Base64Url.Encode(testLong);
+        result.Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("IA", new byte[]{ 0x20, })]
     [InlineData("Ag", new byte[]{ 0x02, })]
     [InlineData("ELg", new byte[]{ 0x10, 0xb8, })]
@@ -33,7 +50,7 @@ public class Encode
     [Theory]
     [InlineData(new byte[] { })]
     [InlineData(null)]
-    public void WhenCalledWithEmptyByteArray_ShouldReturnEmptyString(byte[] testArray)
+    public void WhenCalledWithEmptyByteArray_ShouldReturnEmptyString(byte[]? testArray)
     {
         var actualBase32 = Base64Url.Encode(testArray);
         actualBase32.Should().Be(string.Empty);
@@ -42,7 +59,7 @@ public class Encode
     [Theory]
     [InlineData(new byte[] { })]
     [InlineData(null)]
-    public void WhenCalledWithEmptyByteArray_ShouldReturnZeroAndNotChangeOutput(byte[] testArray)
+    public void WhenCalledWithEmptyByteArray_ShouldReturnZeroAndNotChangeOutput(byte[]? testArray)
     {
         char[] output = ['1', '2', '3', '4'];
 

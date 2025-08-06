@@ -8,18 +8,12 @@ public class ImmutableSequence<T> :
     IReadOnlyList<T>,
     IEquatable<ImmutableSequence<T>>
 {
-    private static readonly int InitialHash = typeof(ImmutableSequence<T>).GetHashCode();
     private static readonly Func<T?, T?, bool> CompareItem = EqualityComparer<T>.Default.Equals;
     private readonly ImmutableList<T> _values;
 
+    public ImmutableSequence() => _values = [];
     public ImmutableSequence(ImmutableList<T> values) => _values = values;
-    public ImmutableSequence() : this(ImmutableArray<T>.Empty)
-    {
-    }
-    public ImmutableSequence(IEnumerable<T> values)
-    {
-        _values = [..values];
-    }
+    public ImmutableSequence(IEnumerable<T> values) => _values = [..values];
     public ImmutableSequence(ReadOnlySpan<T> values) : this(ImmutableList.Create(values))
     {
     }
@@ -37,10 +31,10 @@ public class ImmutableSequence<T> :
         }
     }
 
-    protected virtual ImmutableSequence<T> ConstructNew(ImmutableList<T> values) => new(values);
+    protected virtual ImmutableSequence<T> ConstructNew(ImmutableList<T> values) => [..values];
 
-    public ImmutableSequence<T> Add(T value) => ConstructNew([.._values, value]);
-    public ImmutableSequence<T> AddFront(T value) => ConstructNew([value, .._values]);
+    public ImmutableSequence<T> Add(T value) => ConstructNew(_values.Add(value));
+    public ImmutableSequence<T> AddFront(T value) => ConstructNew(_values.Insert(0, value));
 
     public ImmutableList<T>.Enumerator GetEnumerator() => _values.GetEnumerator();
     IEnumerator<T> IEnumerable<T>.GetEnumerator() => ((IEnumerable<T>)_values).GetEnumerator();
@@ -75,7 +69,6 @@ public class ImmutableSequence<T> :
     public override int GetHashCode()
     {
         HashCode hash = new();
-        hash.Add(InitialHash);
 
         foreach (var value in _values)
         {
