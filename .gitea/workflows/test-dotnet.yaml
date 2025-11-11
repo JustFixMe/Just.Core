@@ -14,11 +14,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: .NET ${{ matrix.dotnet-version }}
+    name: .NET tests
 
-    strategy:
-      matrix:
-        dotnet-version: [ '8.0', '9.0' ]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
 
@@ -28,21 +25,33 @@ jobs:
     - name: Setup .NET
       uses: https://github.com/actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}.x
+        dotnet-version: 10.0.x
 
     - name: Restore dependencies
-      run: dotnet restore -p:TargetFramework=net${{ matrix.dotnet-version }}
+      run: dotnet restore
 
-    - name: Build
-      run: dotnet build --framework net${{ matrix.dotnet-version }} --configuration Release ./Core.Tests/Core.Tests.csproj
+    - name: Build .NET 10.0
+      run: dotnet build --no-restore --framework net10.0 --configuration Release ./Core.Tests/Core.Tests.csproj
 
-    - name: Test
-      run: dotnet run --no-build --framework net${{ matrix.dotnet-version }} --configuration Release --project ./Core.Tests/Core.Tests.csproj -- -trx results-net${{ matrix.dotnet-version }}.trx
+    - name: Build .NET 9.0
+      run: dotnet build --no-restore --framework net9.0 --configuration Release ./Core.Tests/Core.Tests.csproj
+
+    - name: Build .NET 8.0
+      run: dotnet build --no-restore --framework net8.0 --configuration Release ./Core.Tests/Core.Tests.csproj
+
+    - name: Test .NET 10.0
+      run: dotnet run --no-build --framework net10.0 --configuration Release --project ./Core.Tests/Core.Tests.csproj -- -trx TestResults/results-net10.trx
+
+    - name: Test .NET 9.0
+      run: dotnet run --no-build --framework net9.0 --configuration Release --project ./Core.Tests/Core.Tests.csproj -- -trx TestResults/results-net9.trx
+
+    - name: Test .NET 8.0
+      run: dotnet run --no-build --framework net8.0 --configuration Release --project ./Core.Tests/Core.Tests.csproj -- -trx TestResults/results-net8.trx
 
     - name: Upload dotnet test results
       uses: actions/upload-artifact@v3
       with:
-        name: results-net${{ matrix.dotnet-version }}
-        path: results-net${{ matrix.dotnet-version }}.trx
+        name: test-results
+        path: TestResults
         if: ${{ always() }}
         retention-days: 30
