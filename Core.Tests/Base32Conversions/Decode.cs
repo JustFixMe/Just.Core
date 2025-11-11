@@ -19,7 +19,7 @@ public class Decode
             var resultString = Base32.Encode(testBytes);
             var resultBytes = Base32.Decode(resultString);
 
-            resultBytes.Should().BeEquivalentTo(testBytes);
+            resultBytes.ShouldBeEquivalentTo(testBytes);
         }
     }
 
@@ -34,7 +34,7 @@ public class Decode
     public void WhenCalledWithValidString_ShouldReturnValidByteArray(string str, byte[] expected)
     {
         var actualBytesArray = Base32.Decode(str);
-        actualBytesArray.Should().Equal(expected);
+        actualBytesArray.ShouldBe(expected);
     }
 
     [Theory]
@@ -44,7 +44,7 @@ public class Decode
     public void WhenCalledWithValidStringThatEndsWithPaddingSign_ShouldReturnValidByteArray(string testString, byte[] expected)
     {
         var actualBytesArray = Base32.Decode(testString);
-        actualBytesArray.Should().Equal(expected);
+        actualBytesArray.ShouldBe(expected);
     }
 
     [Theory]
@@ -54,7 +54,7 @@ public class Decode
     public void WhenCalledWithValidStringWithoutPaddingSign_ShouldReturnValidByteArray(string testString, byte[] expected)
     {
         var actualBytesArray = Base32.Decode(testString);
-        actualBytesArray.Should().Equal(expected);
+        actualBytesArray.ShouldBe(expected);
     }
 
     [Theory]
@@ -66,7 +66,7 @@ public class Decode
     public void WhenCalledWithNotValidString_ShouldThrowFormatException(string testString)
     {
         Action action = () => Base32.Decode(testString);
-        action.Should().Throw<FormatException>();
+        action.ShouldThrow<FormatException>();
     }
 
     [Theory]
@@ -74,6 +74,6 @@ public class Decode
     [InlineData("")]
     public void WhenCalledWithNullString_ShouldReturnEmptyArray(string? testString)
     {
-        Base32.Decode(testString).Should().BeEmpty();
+        Base32.Decode(testString).ShouldBeEmpty();
     }
 }

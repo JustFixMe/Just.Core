@@ -23,7 +23,7 @@ public class Populate
 
         stream.Populate(buffer, offset, length);
 
-        buffer.Skip(offset).Take(length).Should().Equal(streamContent.Take(length));
+        buffer.Skip(offset).Take(length).ShouldBe(streamContent.Take(length));
     }
 
     [Theory]
@@ -38,7 +38,7 @@ public class Populate
 
         stream.Populate(buffer);
 
-        buffer.Should().Equal(streamContent.Take(bufferSize));
+        buffer.ShouldBe(streamContent.Take(bufferSize));
     }
 
     [Theory]
@@ -53,6 +53,6 @@ public class Populate
 
         Action action = () => stream.Populate(buffer);
 
-        action.Should().Throw<EndOfStreamException>();
+        action.ShouldThrow<EndOfStreamException>();
     }
 }

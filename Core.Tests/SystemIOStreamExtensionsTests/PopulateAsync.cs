@@ -15,7 +15,7 @@ public class PopulateAsync
         Func<Task> action = async () => await stream.PopulateAsync(buffer, cts.Token);
         cts.Cancel();
 
-        await action.Should().ThrowAsync<OperationCanceledException>();
+        await action.ShouldThrowAsync<OperationCanceledException>();
     }
 
     [Theory]
@@ -31,13 +31,14 @@ public class PopulateAsync
     [InlineData(5, 5)]
     public async Task WhenCalled_ShouldPopulateSpecifiedRange(int offset, int length)
     {
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
         byte[] streamContent = [0x01, 0x02, 0x03, 0x04, 0x05,];
         using var stream = new MemoryStream(streamContent);
         var buffer = new byte[10];
 
-        await stream.PopulateAsync(buffer, offset, length);
+        await stream.PopulateAsync(buffer, offset, length, cts.Token);
 
-        buffer.Skip(offset).Take(length).Should().Equal(streamContent.Take(length));
+        buffer.Skip(offset).Take(length).ShouldBe(streamContent.Take(length));
     }
 
     [Theory]
@@ -47,12 +48,13 @@ public class PopulateAsync
     [InlineData(new byte[]{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, }, 5)]
     public async Task WhenStreamContainsSameOrGreaterAmmountOfItems_ShouldPopulateBuffer(byte[] streamContent, int bufferSize)
     {
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
         using var stream = new MemoryStream(streamContent);
         var buffer = new byte[bufferSize];
 
-        await stream.PopulateAsync(buffer);
+        await stream.PopulateAsync(buffer, cts.Token);
 
-        buffer.Should().Equal(streamContent.Take(bufferSize));
+        buffer.ShouldBe(streamContent.Take(bufferSize));
     }
 
     [Theory]
@@ -67,6 +69,6 @@ public class PopulateAsync
 
         Func<Task> action = async () => await stream.PopulateAsync(buffer);
 
-        await action.Should().ThrowAsync<EndOfStreamException>();
+        await action.ShouldThrowAsync<EndOfStreamException>();
     }
 }

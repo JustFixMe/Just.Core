@@ -1,3 +1,4 @@
+
 namespace Just.Core.Tests.SeqIdTests;
 
 public class NextId
@@ -25,9 +26,9 @@ public class NextId
         long sequencePart = (id >> SeqShift) & SeqMask;
         long randomPart = id & RandMask;
 
-        timestampPart.Should().Be(500);
-        sequencePart.Should().Be(0);
-        randomPart.Should().BeInRange(0, RandMask);
+        timestampPart.ShouldBe(500);
+        sequencePart.ShouldBe(0);
+        randomPart.ShouldBeInRange(0, RandMask);
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public class NextId
         long sequence1 = (id1 >> SeqShift) & SeqMask;
         long sequence2 = (id2 >> SeqShift) & SeqMask;
 
-        sequence2.Should().Be(sequence1 + 1);
+        sequence2.ShouldBe(sequence1 + 1);
     }
 
     [Fact]
@@ -61,7 +62,7 @@ public class NextId
 
         // Assert
         long sequence = (id >> SeqShift) & SeqMask;
-        sequence.Should().Be(0);
+        sequence.ShouldBe(0);
     }
 
     [Fact]
@@ -74,7 +75,7 @@ public class NextId
         // Act & Assert
         _seqId.Next(time1); // First call sets last timestamp
         Action act = () => _seqId.Next(time2);
-        act.Should().Throw<InvalidOperationException>()
+        act.ShouldThrow<InvalidOperationException>()
             .WithMessage("Refused to create new SeqId. Last timestamp is in the future.");
     }
 
@@ -90,7 +91,7 @@ public class NextId
             _seqId.Next(time); // Exhauste sequence
         }
         Action act = () => _seqId.Next(time);
-        act.Should().Throw<IndexOutOfRangeException>()
+        act.ShouldThrow<IndexOutOfRangeException>()
             .WithMessage("Refused to create new SeqId. Sequence exhausted.");
     }
 
@@ -105,7 +106,7 @@ public class NextId
 
         // Assert
         long randomPart = id & RandMask;
-        randomPart.Should().BeInRange(0, RandMask);
+        randomPart.ShouldBeInRange(0, RandMask);
     }
 
     [Fact]
@@ -119,7 +120,7 @@ public class NextId
 
         // Assert
         long randomPart = id & RandMask;
-        randomPart.Should().BeInRange(0, RandMask);
+        randomPart.ShouldBeInRange(0, RandMask);
     }
 
     [Fact]
@@ -127,14 +128,14 @@ public class NextId
     {
         // Arrange
         var now = DateTime.UtcNow;
-        var defaultEpoch = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        long expectedTimestamp = (long)(now - defaultEpoch).TotalMilliseconds;
+        var defaultEpoch = SeqId.DefaultEpoch;
+        long expectedTimestamp = ((long)(now - defaultEpoch).TotalMilliseconds) & TimestampMask; // Mask handles overflow
 
         // Act
         long id = SeqId.NextId();
 
         // Assert
         long timestampPart = (id >> TimestampShift) & TimestampMask;
-        timestampPart.Should().BeCloseTo(expectedTimestamp & TimestampMask, 1); // Mask handles overflow
+        timestampPart.ShouldBeInRange(expectedTimestamp, expectedTimestamp + 1);
     }
 }

@@ -12,7 +12,7 @@ public class Encode
     {
         var testGuid = Guid.Parse(testGuidString);
         var result = Base64Url.Encode(testGuid);
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -29,7 +29,7 @@ public class Encode
     public void WhenCalledWithLong_ShouldReturnValidString(string expected, long testLong)
     {
         var result = Base64Url.Encode(testLong);
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -44,7 +44,7 @@ public class Encode
     public void WhenCalled_ShouldReturnValidString(string expected, byte[] testBytes)
     {
         var result = Base64Url.Encode(testBytes);
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -53,7 +53,7 @@ public class Encode
     public void WhenCalledWithEmptyByteArray_ShouldReturnEmptyString(byte[]? testArray)
     {
         var actualBase32 = Base64Url.Encode(testArray);
-        actualBase32.Should().Be(string.Empty);
+        actualBase32.ShouldBe(string.Empty);
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class Encode
 
         var charsWritten = Base64Url.Encode(testArray, output);
 
-        charsWritten.Should().Be(0);
-        output.Should().Equal(['1', '2', '3', '4']);
+        charsWritten.ShouldBe(0);
+        output.ShouldBe((char[])['1', '2', '3', '4']);
     }
 }

@@ -14,8 +14,19 @@ public class NewGuid
         {
             var timestamp = referenceTime.AddSeconds(rng.Next());
             var result = GuidV8.NewGuid(timestamp, entropy);
-            result.Version.Should().Be(8);
-            (result.Variant & 0b1100).Should().Be(0b1000);
+
+#if NET9_0_OR_GREATER
+            result.Version.ShouldBe(8);
+            (result.Variant & 0b1100).ShouldBe(0b1000);
+#else
+            var bytes = result.ToByteArray();
+            // Check version (bits 4-7 of the 7th byte)
+            var version = (bytes[7] >> 4) & 0x0F;
+            version.ShouldBe(8); // UUID version 8
+            // Check variant (bits 6-7 of the 8th byte)
+            var variant = bytes[8] >> 6;
+            variant.ShouldBe(0b10); // Standard UUID variant
+#endif
         }
     }
 
@@ -86,11 +97,11 @@ public class NewGuid
         var sut = expected.Values.ToArray();
         rng.Shuffle(sut);
 
-        sut.Order().Should().Equal(expected.Select(x => x.Value));
-        sut.OrderBy(x => x.ToString()).Should().Equal(expected.Select(x => x.Value));
+        sut.Order().ShouldBe(expected.Select(x => x.Value));
+        sut.OrderBy(x => x.ToString()).ShouldBe(expected.Select(x => x.Value));
 
-        sut.OrderDescending().Should().Equal(expected.Reverse().Select(x => x.Value));
-        sut.OrderByDescending(x => x.ToString()).Should().Equal(expected.Reverse().Select(x => x.Value));
+        sut.OrderDescending().ShouldBe(expected.Reverse().Select(x => x.Value));
+        sut.OrderByDescending(x => x.ToString()).ShouldBe(expected.Reverse().Select(x => x.Value));
     }
 
     [Theory]
@@ -160,11 +171,11 @@ public class NewGuid
         var sut = expected.Values.ToArray();
         rng.Shuffle(sut);
 
-        sut.Order().Should().Equal(expected.Select(x => x.Value));
-        sut.OrderBy(x => x.ToString()).Should().Equal(expected.Select(x => x.Value));
+        sut.Order().ShouldBe(expected.Select(x => x.Value));
+        sut.OrderBy(x => x.ToString()).ShouldBe(expected.Select(x => x.Value));
 
-        sut.OrderDescending().Should().Equal(expected.Reverse().Select(x => x.Value));
-        sut.OrderByDescending(x => x.ToString()).Should().Equal(expected.Reverse().Select(x => x.Value));
+        sut.OrderDescending().ShouldBe(expected.Reverse().Select(x => x.Value));
+        sut.OrderByDescending(x => x.ToString()).ShouldBe(expected.Reverse().Select(x => x.Value));
     }
 
     [Theory]
@@ -234,10 +245,10 @@ public class NewGuid
         var sut = expected.Values.ToArray();
         rng.Shuffle(sut);
 
-        sut.Order().Should().Equal(expected.Select(x => x.Value));
-        sut.OrderBy(x => x.ToString()).Should().Equal(expected.Select(x => x.Value));
+        sut.Order().ShouldBe(expected.Select(x => x.Value));
+        sut.OrderBy(x => x.ToString()).ShouldBe(expected.Select(x => x.Value));
 
-        sut.OrderDescending().Should().Equal(expected.Reverse().Select(x => x.Value));
-        sut.OrderByDescending(x => x.ToString()).Should().Equal(expected.Reverse().Select(x => x.Value));
+        sut.OrderDescending().ShouldBe(expected.Reverse().Select(x => x.Value));
+        sut.OrderByDescending(x => x.ToString()).ShouldBe(expected.Reverse().Select(x => x.Value));
     }
 }

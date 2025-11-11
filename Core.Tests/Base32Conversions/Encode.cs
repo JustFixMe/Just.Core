@@ -31,7 +31,7 @@ public class Encode
         var resultBytes = Base32.Decode(testString);
         var resultString = Base32.Encode(resultBytes);
 
-        resultString.Should().Be(testString);
+        resultString.ShouldBe(testString);
     }
 
     [Theory]
@@ -47,7 +47,7 @@ public class Encode
     public void WhenCalledWithNotEmptyByteArray_ShouldReturnValidString(string expected, byte[] testArray)
     {
         var str = Base32.Encode(testArray);
-        str.Should().Be(expected);
+        str.ShouldBe(expected);
     }
 
     [Theory]
@@ -56,7 +56,7 @@ public class Encode
     public void WhenCalledWithEmptyByteArray_ShouldReturnEmptyString(byte[]? testArray)
     {
         var actualBase32 = Base32.Encode(testArray);
-        actualBase32.Should().Be(string.Empty);
+        actualBase32.ShouldBe(string.Empty);
     }
 
     [Theory]
@@ -68,7 +68,7 @@ public class Encode
 
         var charsWritten = Base32.Encode(testArray, output);
 
-        charsWritten.Should().Be(0);
-        output.Should().Equal(['1', '2', '3', '4']);
+        charsWritten.ShouldBe(0);
+        output.ShouldBe(['1', '2', '3', '4']);
     }
 }

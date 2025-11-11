@@ -19,7 +19,7 @@ public class Decode
             var resultString = Base64Url.Encode(testBytes);
             var resultBytes = Base64Url.Decode(resultString);
 
-            resultBytes.Should().BeEquivalentTo(testBytes);
+            resultBytes.ShouldBeEquivalentTo(testBytes);
         }
     }
 
@@ -39,7 +39,7 @@ public class Decode
             var resultString = Base64Url.Encode(testLong);
             var resultLong = Base64Url.DecodeLong(resultString);
 
-            resultLong.Should().Be(testLong);
+            resultLong.ShouldBe(testLong);
         }
     }
 
@@ -57,7 +57,7 @@ public class Decode
     public void WhenCalled_ShouldReturnValidLong(string testString, long expected)
     {
         var result = Base64Url.DecodeLong(testString);
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -70,7 +70,7 @@ public class Decode
     {
         var result = Base64Url.DecodeGuid(testString);
         var expected = Guid.Parse(expectedStr);
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -85,7 +85,7 @@ public class Decode
     public void WhenCalled_ShouldReturnValidBytes(string testString, byte[] expected)
     {
         var result = Base64Url.Decode(testString);
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Theory]
@@ -97,7 +97,7 @@ public class Decode
     public void WhenCalledWithInvalidString_ShouldThrowFormatException(string testString)
     {
         Action action = () => Base64Url.Decode(testString);
-        action.Should().Throw<FormatException>();
+        action.ShouldThrow<FormatException>();
     }
 
     [Theory]
@@ -109,7 +109,7 @@ public class Decode
     public void WhenCalledWithInvalidGuidString_ShouldThrowFormatException(string testString)
     {
         Action action = () => Base64Url.DecodeGuid(testString);
-        action.Should().Throw<FormatException>();
+        action.ShouldThrow<FormatException>();
     }
 
     [Theory]
@@ -122,7 +122,7 @@ public class Decode
     public void WhenCalledWithInvalidLongString_ShouldThrowFormatException(string testString)
     {
         Action action = () => Base64Url.DecodeLong(testString);
-        action.Should().Throw<FormatException>();
+        action.ShouldThrow<FormatException>();
     }
 
     [Theory]
@@ -130,6 +130,6 @@ public class Decode
     [InlineData("")]
     public void WhenCalledWithNullString_ShouldReturnEmptyArray(string? testString)
     {
-        Base64Url.Decode(testString).Should().BeEmpty();
+        Base64Url.Decode(testString).ShouldBeEmpty();
     }
 }
