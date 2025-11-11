@@ -34,7 +34,7 @@ jobs:
     #   run: dotnet restore
 
     - name: Build
-      run: dotnet build --framework net${{ matrix.dotnet-version }} --configuration Release --project ./Core.Tests/Core.Tests.csproj
+      run: dotnet build --framework net${{ matrix.dotnet-version }} --configuration Release ./Core.Tests/Core.Tests.csproj
 
     - name: Test
       run: dotnet run --no-build --framework net${{ matrix.dotnet-version }} --configuration Release --project ./Core.Tests/Core.Tests.csproj -- -trx results-net${{ matrix.dotnet-version }}.trx
