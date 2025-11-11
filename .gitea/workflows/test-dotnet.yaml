@@ -30,8 +30,8 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet-version }}.x
 
-    # - name: Restore dependencies
-    #   run: dotnet restore
+    - name: Restore dependencies
+      run: dotnet restore -p:TargetFramework=net${{ matrix.dotnet-version }}
 
     - name: Build
       run: dotnet build --framework net${{ matrix.dotnet-version }} --configuration Release ./Core.Tests/Core.Tests.csproj
@@ -40,7 +40,7 @@ jobs:
       run: dotnet run --no-build --framework net${{ matrix.dotnet-version }} --configuration Release --project ./Core.Tests/Core.Tests.csproj -- -trx results-net${{ matrix.dotnet-version }}.trx
 
     - name: Upload dotnet test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: results-net${{ matrix.dotnet-version }}
         path: results-net${{ matrix.dotnet-version }}.trx
